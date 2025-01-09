@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Welcome to DonateShare - Share and Help{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('{% static "images/hero-bg.jpg" %}') center/cover;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        color: white;
+        position: relative;
+    }
+    .feature-card {
+        transition: transform 0.3s;
+        height: 100%;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .feature-card:hover {
+        transform: translateY(-10px);
+    }
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--bs-primary);
+    }
+    .btn-hero {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-radius: 50px;
+        margin: 0 10px;
+    }
+    .hero-content {
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    .hero-subtitle {
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">Share What You Don't Need,<br>Help Those Who Do</h1>
+            <p class="hero-subtitle">Join our community of donors and recipients to make a real difference in people's lives.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'login' %}" class="btn btn-primary btn-hero">
+                    <i class="fas fa-sign-in-alt me-2"></i> Sign In
+                </a>
+                <a href="{% url 'chat:register' %}" class="btn btn-outline-light btn-hero">
+                    <i class="fas fa-user-plus me-2"></i> Join Now
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">How It Works</h2>
+        <div class="row g-4">
+            <!-- Donate Feature -->
+            <div class="col-md-4">
+                <div class="card feature-card text-center p-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <h3 class="h4 mb-3">Donate Items</h3>
+                    <p class="text-muted mb-0">
+                        List items you no longer need. Add photos and descriptions to help others find what they're looking for.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Connect Feature -->
+            <div class="col-md-4">
+                <div class="card feature-card text-center p-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3 class="h4 mb-3">Connect Safely</h3>
+                    <p class="text-muted mb-0">
+                        Chat with donors or recipients through our secure messaging system to arrange pickups.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Impact Feature -->
+            <div class="col-md-4">
+                <div class="card feature-card text-center p-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3 class="h4 mb-3">Make an Impact</h3>
+                    <p class="text-muted mb-0">
+                        Help reduce waste and support your community by giving items a second life with those in need.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="bg-primary text-white py-5">
+    <div class="container text-center">
+        <h2 class="mb-4">Ready to Make a Difference?</h2>
+        <p class="lead mb-4">Join our growing community of donors and recipients today.</p>
+        <a href="{% url 'chat:register' %}" class="btn btn-light btn-lg px-4">
+            <i class="fas fa-user-plus me-2"></i> Get Started
+        </a>
+    </div>
+</section>
+{% endblock %} 

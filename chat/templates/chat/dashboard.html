@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- User Profile Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Welcome, {{ request.user.username }}!</h5>
+                    <p class="card-text">
+                        <strong>Role:</strong> {{ user_profile.get_user_type_display }}<br>
+                        <strong>Member since:</strong> {{ request.user.date_joined|date:"M d, Y" }}
+                    </p>
+                    <a href="{% url 'chat:profile' %}" class="btn btn-outline-primary">Edit Profile</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-md-8 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Actions</h5>
+                    <div class="row g-3">
+                        {% if user_profile.user_type == 'DONOR' %}
+                            <div class="col-sm-6">
+                                <a href="{% url 'chat:donation_create' %}" class="btn btn-primary w-100">
+                                    <i class="fas fa-gift"></i> Create Donation
+                                </a>
+                            </div>
+                        {% endif %}
+                        <div class="col-sm-6">
+                            <a href="{% url 'chat:donation_list' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-list"></i> Browse Donations
+                            </a>
+                        </div>
+                        <div class="col-sm-6">
+                            <a href="{% url 'chat:chat_list' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-comments"></i> Messages
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Recent Activity</h5>
+                        {% if user_profile.user_type == 'DONOR' %}
+                            <a href="{% url 'chat:donation_list' %}" class="btn btn-sm btn-outline-primary">View All Donations</a>
+                        {% endif %}
+                    </div>
+
+                    {% if user_profile.user_type == 'DONOR' %}
+                        <!-- Donor's Recent Donations -->
+                        {% if recent_donations %}
+                            <div class="list-group">
+                                {% for donation in recent_donations %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">{{ donation.item_name }}</h6>
+                                            <small class="text-muted">{{ donation.donation_date|timesince }} ago</small>
+                                        </div>
+                                        <p class="mb-1">{{ donation.description|truncatechars:100 }}</p>
+                                        <small>Status: <span class="badge bg-{{ donation.status|lower }}">{{ donation.get_status_display }}</span></small>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted">No recent donations.</p>
+                        {% endif %}
+                    {% else %}
+                        <!-- Recipient's Recent Requests -->
+                        {% if recent_requests %}
+                            <div class="list-group">
+                                {% for request in recent_requests %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">{{ request.donation.item_name }}</h6>
+                                            <small class="text-muted">{{ request.request_date|timesince }} ago</small>
+                                        </div>
+                                        <p class="mb-1">Donor: {{ request.donation.donor.username }}</p>
+                                        <small>Status: <span class="badge bg-{{ request.status|lower }}">{{ request.get_status_display }}</span></small>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted">No recent requests.</p>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

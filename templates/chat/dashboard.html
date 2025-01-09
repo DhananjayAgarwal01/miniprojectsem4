@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - DonateShare{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        transition: transform 0.2s;
+    }
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+    }
+    .status-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="mb-0">Welcome, {{ user.username }}!</h2>
+            <p class="text-muted">{{ user_profile.get_user_type_display }}</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'chat:donation_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Donation
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Donations -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Your Recent Donations</h5>
+                    <a href="{% url 'chat:donation_list' %}" class="btn btn-outline-primary btn-sm">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        {% for donation in donations %}
+                        <div class="col-md-6">
+                            <div class="card dashboard-card h-100">
+                                {% if donation.image_path %}
+                                <img src="{{ donation.image_path.url }}" class="card-img-top" alt="{{ donation.item_name }}" style="height: 200px; object-fit: cover;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-gift fa-3x text-muted"></i>
+                                </div>
+                                {% endif %}
+                                <div class="card-body">
+                                    <span class="badge bg-{{ donation.status|lower }} status-badge">{{ donation.get_status_display }}</span>
+                                    <h5 class="card-title">{{ donation.item_name }}</h5>
+                                    <p class="card-text small text-muted">
+                                        <i class="fas fa-calendar"></i> {{ donation.donation_date|date:"M d, Y" }}<br>
+                                        <i class="fas fa-tag"></i> {{ donation.category.name }}
+                                    </p>
+                                    <a href="{% url 'chat:donation_detail' donation.pk %}" class="btn btn-outline-primary btn-sm">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                You haven't made any donations yet. <a href="{% url 'chat:donation_create' %}">Create one now!</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pickup Requests -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Requests</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for request in requests %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">{{ request.donation.item_name }}</h6>
+                                    <p class="small text-muted mb-1">
+                                        {% if user_profile.user_type == 'DONOR' %}
+                                        Requested by: {{ request.recipient.username }}<br>
+                                        {% else %}
+                                        Donated by: {{ request.donation.donor.username }}<br>
+                                        {% endif %}
+                                        Pickup date: {{ request.pickup_date|date:"M d, Y" }}
+                                    </p>
+                                    <span class="badge bg-{{ request.status|lower }}">{{ request.get_status_display }}</span>
+                                </div>
+                                {% if user_profile.user_type == 'DONOR' and request.status == 'PENDING' %}
+                                <div class="btn-group-vertical btn-group-sm">
+                                    <button class="btn btn-success btn-sm request-action" 
+                                            data-request-id="{{ request.id }}" 
+                                            data-action="accept">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-sm request-action"
+                                            data-request-id="{{ request.id }}"
+                                            data-action="reject">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="p-3">
+                            <p class="text-muted mb-0">No requests yet.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.request-action').forEach(button => {
+    button.addEventListener('click', function() {
+        const requestId = this.dataset.requestId;
+        const action = this.dataset.action;
+        const status = action === 'accept' ? 'ACCEPTED' : 'REJECTED';
+
+        fetch('/api/requests/update-status/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                request_id: requestId,
+                status: status
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.location.reload();
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

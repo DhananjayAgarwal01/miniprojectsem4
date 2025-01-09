@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - DonateShare{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Hero Section -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="mb-3">Welcome to DonateShare</h2>
+                    <p class="lead mb-4">Share items you no longer need with those who could use them.</p>
+                    {% if user.is_authenticated %}
+                        {% if user_profile.user_type == 'DONOR' %}
+                        <a href="{% url 'chat:donation_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Create Donation
+                        </a>
+                        {% else %}
+                        <a href="{% url 'chat:donation_list' %}" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Browse Donations
+                        </a>
+                        {% endif %}
+                    {% else %}
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'login' %}" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                        <a href="{% url 'chat:register' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-user-plus"></i> Register
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Stats</h5>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h3>{{ recent_donations.count }}</h3>
+                            <p class="text-muted mb-0">Recent Donations</p>
+                        </div>
+                        <div class="col-6">
+                            <h3>{{ donation_requests.count }}</h3>
+                            <p class="text-muted mb-0">Active Requests</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Donations -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Donations</h5>
+                    <a href="{% url 'chat:donation_list' %}" class="btn btn-outline-primary btn-sm">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        {% for donation in recent_donations %}
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                {% if donation.image_path %}
+                                <img src="{{ donation.image_path.url }}" class="card-img-top" alt="{{ donation.item_name }}" style="height: 200px; object-fit: cover;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-gift fa-3x text-muted"></i>
+                                </div>
+                                {% endif %}
+                                <div class="card-body">
+                                    <span class="badge bg-{{ donation.status|lower }} position-absolute top-0 end-0 mt-2 me-2">
+                                        {{ donation.get_status_display }}
+                                    </span>
+                                    <h5 class="card-title">{{ donation.item_name }}</h5>
+                                    <p class="card-text small text-muted">
+                                        <i class="fas fa-calendar"></i> {{ donation.donation_date|date:"M d, Y" }}<br>
+                                        <i class="fas fa-tag"></i> {{ donation.category.name }}
+                                    </p>
+                                    <a href="{% url 'chat:donation_detail' donation.pk %}" class="btn btn-outline-primary btn-sm">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-12">
+                            <p class="text-muted text-center mb-0">No donations available.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if user.is_authenticated and donation_requests %}
+    <!-- Recent Requests -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Requests</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for request in donation_requests %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">{{ request.donation.item_name }}</h6>
+                                    <p class="small text-muted mb-1">
+                                        Requested by: {{ request.recipient.username }}<br>
+                                        Pickup date: {{ request.pickup_date|date:"M d, Y" }}
+                                    </p>
+                                    <span class="badge bg-{{ request.status|lower }}">{{ request.get_status_display }}</span>
+                                </div>
+                                <a href="{% url 'chat:donation_detail' request.donation.pk %}" class="btn btn-outline-primary btn-sm">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

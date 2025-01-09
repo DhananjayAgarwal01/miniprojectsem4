@@ -1,0 +1,447 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ profile.user.username }}'s Profile - DonateShare{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Profile Container */
+    .profile-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 0;
+    }
+
+    /* Profile Header */
+    .profile-header {
+        background: linear-gradient(45deg, var(--bs-primary), #4a90e2);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    /* Profile Avatar */
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: white;
+        color: var(--bs-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-name {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-meta {
+        opacity: 0.8;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Profile Stats */
+    .profile-stats {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.875rem;
+    }
+
+    /* Profile Content */
+    .profile-content {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 2rem;
+    }
+
+    /* Profile Sidebar */
+    .profile-sidebar {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        padding: 1.5rem;
+    }
+
+    .sidebar-section {
+        margin-bottom: 2rem;
+    }
+
+    .sidebar-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .sidebar-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #212529;
+    }
+
+    .info-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+        color: #495057;
+    }
+
+    .info-item i {
+        color: var(--bs-primary);
+        width: 20px;
+    }
+
+    /* Profile Main */
+    .profile-main {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        padding: 1.5rem;
+    }
+
+    .tab-content {
+        margin-top: 1.5rem;
+    }
+
+    /* Donation Cards */
+    .donation-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .donation-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
+        height: 100%;
+    }
+
+    .donation-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .donation-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .donation-content {
+        padding: 1rem;
+    }
+
+    .donation-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #212529;
+    }
+
+    .donation-meta {
+        color: #6c757d;
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        margin-bottom: 1rem;
+        color: #343a40;
+    }
+
+    .empty-state p {
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="profile-container">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="text-center">
+                <div class="profile-avatar mx-auto">
+                    {{ profile.user.username|make_list|first|upper }}
+                </div>
+                <h1 class="profile-name">{{ profile.user.username }}</h1>
+                <p class="profile-meta">
+                    Member since {{ profile.user.date_joined|date:"F Y" }}
+                </p>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ donation_count }}</div>
+                        <div class="stat-label">Donations</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ request_count }}</div>
+                        <div class="stat-label">Requests</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ completed_count }}</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                </div>
+                {% if user != profile.user %}
+                <a href="{% url 'chat:chat_detail' profile.user.username %}" 
+                   class="btn btn-light">
+                    <i class="fas fa-comments"></i> Send Message
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="profile-content">
+            <!-- Sidebar -->
+            <div class="profile-sidebar">
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">About</h3>
+                    <ul class="info-list">
+                        <li class="info-item">
+                            <i class="fas fa-user"></i>
+                            <span>{{ profile.get_user_type_display }}</span>
+                        </li>
+                        <li class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ profile.location|default:"Location not specified" }}</span>
+                        </li>
+                        <li class="info-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>{{ profile.user.email }}</span>
+                            {% if profile.email_verified %}
+                            <span class="badge bg-success ms-2">Verified</span>
+                            {% else %}
+                            <span class="badge bg-warning ms-2">Unverified</span>
+                            {% endif %}
+                        </li>
+                        <li class="info-item">
+                            <i class="fas fa-phone"></i>
+                            <span>{{ profile.phone|default:"Phone not specified" }}</span>
+                        </li>
+                    </ul>
+                    {% if user == profile.user and not profile.email_verified %}
+                    <div class="mt-3">
+                        <form method="post" action="{% url 'chat:resend_verification' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="fas fa-envelope"></i> Resend Verification Email
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if user == profile.user %}
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Actions</h3>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'chat:profile_edit' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </a>
+                        {% if profile.user_type == 'DONOR' %}
+                        <a href="{% url 'chat:donation_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Create Donation
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Main Content -->
+            <div class="profile-main">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" 
+                           data-bs-toggle="tab" 
+                           href="#donations" 
+                           role="tab">
+                            Donations
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" 
+                           data-bs-toggle="tab" 
+                           href="#requests" 
+                           role="tab">
+                            Requests
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#login-history" role="tab">
+                            <i class="fas fa-history"></i> Login History
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <!-- Donations Tab -->
+                    <div class="tab-pane fade show active" id="donations" role="tabpanel">
+                        {% if donations %}
+                        <div class="donation-grid">
+                            {% for donation in donations %}
+                            <div class="donation-card">
+                                {% if donation.image %}
+                                <img src="{{ donation.image.url }}" 
+                                     alt="{{ donation.title }}" 
+                                     class="donation-image">
+                                {% endif %}
+                                <div class="donation-content">
+                                    <h5 class="donation-title">{{ donation.title }}</h5>
+                                    <div class="donation-meta">
+                                        <i class="fas fa-tag"></i> {{ donation.category.name }}
+                                        <br>
+                                        <i class="fas fa-clock"></i> {{ donation.created_at|timesince }} ago
+                                    </div>
+                                    <a href="{% url 'chat:donation_detail' donation.id %}" 
+                                       class="btn btn-outline-primary btn-sm w-100">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-box-open"></i>
+                            <h3>No Donations Yet</h3>
+                            {% if user == profile.user and profile.user_type == 'DONOR' %}
+                            <p>Start sharing items with your community</p>
+                            <a href="{% url 'chat:donation_create' %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Create Donation
+                            </a>
+                            {% else %}
+                            <p>No donations have been made yet</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Requests Tab -->
+                    <div class="tab-pane fade" id="requests" role="tabpanel">
+                        {% if requests %}
+                        <div class="donation-grid">
+                            {% for request in requests %}
+                            <div class="donation-card">
+                                {% if request.donation.image %}
+                                <img src="{{ request.donation.image.url }}" 
+                                     alt="{{ request.donation.title }}" 
+                                     class="donation-image">
+                                {% endif %}
+                                <div class="donation-content">
+                                    <h5 class="donation-title">{{ request.donation.title }}</h5>
+                                    <div class="donation-meta">
+                                        <i class="fas fa-tag"></i> {{ request.donation.category.name }}
+                                        <br>
+                                        <i class="fas fa-clock"></i> {{ request.created_at|timesince }} ago
+                                        <br>
+                                        <i class="fas fa-info-circle"></i> {{ request.get_status_display }}
+                                    </div>
+                                    <a href="{% url 'chat:donation_detail' request.donation.id %}" 
+                                       class="btn btn-outline-primary btn-sm w-100">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-hand-holding-heart"></i>
+                            <h3>No Requests Yet</h3>
+                            {% if user == profile.user and profile.user_type == 'RECIPIENT' %}
+                            <p>Start requesting items from donors</p>
+                            <a href="{% url 'chat:donation_list' %}" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Browse Donations
+                            </a>
+                            {% else %}
+                            <p>No requests have been made yet</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Login History Tab -->
+                    <div class="tab-pane fade" id="login-history" role="tabpanel">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Login History</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Date & Time</th>
+                                                <th>IP Address</th>
+                                                <th>Device</th>
+                                                <th>Location</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for login in login_history %}
+                                            <tr>
+                                                <td>{{ login.login_datetime|date:"M d, Y H:i" }}</td>
+                                                <td>{{ login.ip_address|default:"Unknown" }}</td>
+                                                <td>{{ login.device_type|default:"Unknown" }}</td>
+                                                <td>{{ login.location|default:"Unknown" }}</td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="4" class="text-center">No login history available</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

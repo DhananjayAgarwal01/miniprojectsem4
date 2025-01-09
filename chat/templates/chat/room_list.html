@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Your Chats</h1>
+            
+            {% if rooms %}
+                <div class="list-group">
+                    {% for room in rooms %}
+                        <a href="{% url 'chat:room' room.name %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">
+                                    {% if room.donation %}
+                                        Chat about: {{ room.donation.item_name }}
+                                    {% else %}
+                                        {{ room.name }}
+                                    {% endif %}
+                                </h5>
+                                {% if room.latest_message %}
+                                    <small>{{ room.latest_message.timestamp|timesince }} ago</small>
+                                {% endif %}
+                            </div>
+                            
+                            <p class="mb-1">
+                                {% if room.donation %}
+                                    {% if request.user == room.donor %}
+                                        Chatting with: {{ room.recipient.username }} (Recipient)
+                                    {% else %}
+                                        Chatting with: {{ room.donor.username }} (Donor)
+                                    {% endif %}
+                                {% endif %}
+                            </p>
+                            
+                            {% if room.latest_message %}
+                                <small>
+                                    {{ room.latest_message.user.username }}: {{ room.latest_message.content|truncatechars:50 }}
+                                </small>
+                            {% else %}
+                                <small class="text-muted">No messages yet</small>
+                            {% endif %}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <p class="mb-0">You don't have any active chats yet.</p>
+                    {% if user_profile.user_type == 'RECIPIENT' %}
+                        <p class="mb-0">Browse <a href="{% url 'chat:donation_list' %}">available donations</a> to start a chat with a donor.</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

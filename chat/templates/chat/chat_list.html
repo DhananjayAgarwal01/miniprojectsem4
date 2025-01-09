@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Your Messages</h1>
+            
+            {% if conversations %}
+                <div class="list-group">
+                    {% for conv in conversations %}
+                        <a href="{% url 'chat:chat_detail' conv.user.id %}" class="list-group-item list-group-item-action {% if conv.unread_count %}list-group-item-primary{% endif %}">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">{{ conv.user.username }}</h5>
+                                    {% if conv.latest_message %}
+                                        <p class="mb-1">
+                                            {% if conv.latest_message.sender == request.user %}
+                                                You:
+                                            {% endif %}
+                                            {{ conv.latest_message.content|truncatechars:50 }}
+                                        </p>
+                                        <small class="text-muted">{{ conv.latest_message.timestamp|timesince }} ago</small>
+                                    {% else %}
+                                        <p class="mb-1 text-muted">No messages yet</p>
+                                    {% endif %}
+                                </div>
+                                {% if conv.unread_count %}
+                                    <span class="badge bg-primary rounded-pill">{{ conv.unread_count }}</span>
+                                {% endif %}
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <p class="mb-0">You don't have any messages yet.</p>
+                    {% if user_profile.user_type == 'RECIPIENT' %}
+                        <p class="mb-0">Browse <a href="{% url 'chat:donation_list' %}">available donations</a> to start chatting with donors.</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 
