@@ -132,7 +132,17 @@ def donation_edit(request, pk):
     if request.method == 'POST':
         form = DonationForm(request.POST, request.FILES, instance=donation)
         if form.is_valid():
-            form.save()
+            donation = form.save(commit=False)
+            
+            # Handle image upload
+            image = form.cleaned_data.get('image')
+            if image:
+                # Read image data
+                donation.image = image.read()
+                donation.image_name = image.name
+                donation.image_type = image.content_type
+            
+            donation.save()
             messages.success(request, 'Donation updated successfully!')
             return redirect('chat:donation_detail', pk=pk)
     else:
