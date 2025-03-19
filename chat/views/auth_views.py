@@ -62,16 +62,45 @@ def register(request):
 @login_required
 def profile(request):
     """User profile view."""
+    user_profile = request.user.userprofile
+    context = {
+        'profile': user_profile,
+        'donation_count': user_profile.user.donations.count(),
+        'request_count': user_profile.user.pickup_requests.count(),
+        'completed_count': user_profile.user.pickup_requests.filter(status='COMPLETED').count(),
+        'donations': user_profile.user.donations.order_by('-donation_date')[:6],
+        'requests': user_profile.user.pickup_requests.order_by('-request_date')[:6]
+    }
+    return render(request, 'chat/profile.html', context)
+
+@login_required
+def profile_edit(request):
+    """Edit profile view."""
     if request.method == 'POST':
         user_profile = request.user.userprofile
+        user = request.user
+
+        # Update user email
+        email = request.POST.get('email')
+        if email and email != user.email:
+            user.email = email
+            user.save()
+
+        # Update profile fields
+        user_profile.phone = request.POST.get('phone', '')
+        user_profile.location = request.POST.get('location', '')
         user_profile.profile_info = request.POST.get('profile_info', '')
+        user_profile.email_notifications = request.POST.get('email_notifications') == 'on'
+        
         user_profile.save()
         messages.success(request, 'Profile updated successfully!')
         return redirect('chat:profile')
     
-    return render(request, 'chat/profile.html', {
+    return render(request, 'chat/profile_edit.html', {
+        'user': request.user,
         'user_profile': request.user.userprofile
     })
+
 
 def landing_page(request):
     """Landing page for non-authenticated users."""
@@ -123,4 +152,4 @@ def dashboard(request):
         'donations': donations,
         'requests': requests,
         'user_profile': user_profile
-    }) 
+    })

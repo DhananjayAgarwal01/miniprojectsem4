@@ -36,9 +36,13 @@ def donation_list(request):
     page = request.GET.get('page')
     donations = paginator.get_page(page)
     
+    # Get condition choices from model
+    conditions = Donation._meta.get_field('condition').choices
+    
     return render(request, 'chat/donation_list.html', {
         'donations': donations,
         'categories': categories,
+        'conditions': conditions,
         'selected_category': category,
         'selected_condition': condition,
         'search_query': query,
@@ -267,4 +271,4 @@ def request_pickup(request, pk):
             messages.error(request, f"Error submitting pickup request: {str(e)}")
             return redirect('chat:donation_detail', pk=pk)
     
-    return redirect('chat:donation_detail', pk=pk) 
+    return redirect('chat:donation_detail', pk=pk)
