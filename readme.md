@@ -2,7 +2,7 @@
 # Mini Project (Semester 4)
 
 ## Overview
-This is a Django-based web application featuring a real-time chat system implemented with Django Channels and WebSocket protocol. The project demonstrates modern web technologies for real-time communication and efficient database management.
+DonateShare is an innovative web platform designed to bridge the gap between donors and recipients through a seamless, real-time communication system. This Django-based application combines modern web technologies with a user-friendly interface to create an efficient donation management ecosystem. By leveraging Django Channels and WebSocket protocol, the platform enables instant messaging between users, facilitating quick and effective coordination of donation activities. The system features robust user authentication, secure donation tracking, and an intuitive profile management system, all backed by efficient database management and responsive design principles.
 
 ## Key Features
 - User Authentication and Authorization

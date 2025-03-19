@@ -59,6 +59,15 @@ def donation_create(request):
             if form.is_valid():
                 donation = form.save(commit=False)
                 donation.donor = request.user
+                
+                # Handle image upload
+                image = form.cleaned_data.get('image')
+                if image:
+                    # Read image data
+                    donation.image = image.read()
+                    donation.image_name = image.name
+                    donation.image_type = image.content_type
+                
                 donation.save()
                 messages.success(request, 'Donation created successfully!')
                 return redirect('chat:donation_detail', pk=donation.pk)
@@ -97,8 +106,15 @@ def donation_detail(request, pk):
         category=donation.category
     ).exclude(pk=donation.pk)[:3]
     
+    # Convert binary image data to base64 if image exists
+    image_data = None
+    if donation.image:
+        import base64
+        image_data = f"data:{donation.image_type};base64,{base64.b64encode(donation.image).decode('utf-8')}"
+    
     return render(request, 'chat/donation_detail.html', {
         'donation': donation,
+        'image_data': image_data,
         'requests': requests,
         'similar_donations': similar_donations,
         'user_profile': request.user.userprofile

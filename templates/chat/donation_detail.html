@@ -165,8 +165,8 @@
     <div class="row">
         <!-- Donation Details -->
         <div class="col-md-8">
-            {% if donation.image %}
-                <img src="{{ donation.image.url }}" class="donation-image mb-4" alt="{{ donation.item_name }}">
+            {% if image_data %}
+                <img src="{{ image_data }}" class="donation-image mb-4" alt="{{ donation.item_name }}">
             {% else %}
                 <div class="donation-placeholder mb-4">
                     <i class="fas fa-image fa-4x text-muted"></i>

@@ -8,6 +8,7 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('profile/', views.profile, name='profile'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('resend-verification/', views.resend_verification, name='resend_verification'),
     
     # Chat URLs
     path('messages/', views.chat_list, name='chat_list'),
@@ -27,4 +28,4 @@ urlpatterns = [
     # API URLs
     path('api/donations/filter/', views.donation_filter, name='donation_filter'),
     path('api/requests/update-status/', views.update_request_status, name='update_request_status'),
-] 
+]

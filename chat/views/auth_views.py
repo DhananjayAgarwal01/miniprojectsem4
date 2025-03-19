@@ -182,3 +182,27 @@ def dashboard(request):
         'requests': requests,
         'user_profile': user_profile
     })
+
+@login_required
+def resend_verification(request):
+    """Resend email verification link."""
+    if request.method != 'POST':
+        return redirect('chat:profile')
+    
+    try:
+        user_profile = request.user.userprofile
+        if user_profile.email_verified:
+            messages.info(request, 'Your email is already verified.')
+            return redirect('chat:profile')
+        
+        # Generate verification token
+        verification_token = user_profile.generate_verification_token()
+        
+        # Send verification email
+        send_verification_email(request.user, verification_token)
+        
+        messages.success(request, 'Verification email has been sent. Please check your inbox.')
+    except Exception as e:
+        messages.error(request, 'Failed to send verification email. Please try again later.')
+    
+    return redirect('chat:profile')
