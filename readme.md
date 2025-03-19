@@ -8,16 +8,16 @@ This is a Django-based web application featuring a real-time chat system impleme
 - User Authentication and Authorization
 - Real-time Chat with WebSocket Support
 - Profile Management
-- Donation System
+- Donation System with In-Database Image Storage
 - Responsive UI Design
-- SQLite Database Integration
+- MySQL Database Integration
 
 ## Technical Stack
 - **Backend Framework**: Django 4.x
 - **WebSocket Server**: Daphne (ASGI Server)
 - **Channel Layer**: Redis (for production) / In-Memory Channel Layer (for development)
 - **Frontend**: HTML5, CSS3, JavaScript
-- **Database**: SQLite3
+- **Database**: MySQL
 - **Real-time Protocol**: WebSocket
 
 ## Installation
@@ -26,6 +26,7 @@ This is a Django-based web application featuring a real-time chat system impleme
 Ensure you have the following installed:
 - Python 3.x
 - pip (Python package manager)
+- MySQL Server
 - Redis (for production deployment)
 - Virtual environment (recommended)
 
@@ -50,106 +51,52 @@ Ensure you have the following installed:
    pip install -r requirements.txt
    ```
 
-4. Apply database migrations:
+4. Configure MySQL Database:
+   - Create a MySQL database named 'donateshare_db'
+   - Update database settings in settings.py if needed
+
+5. Run migrations:
    ```sh
+   python manage.py makemigrations
    python manage.py migrate
    ```
 
-5. Create a superuser (optional):
-   ```sh
-   python manage.py createsuperuser
-   ```
-
-6. Run development server:
+6. Start the development server:
    ```sh
    python manage.py runserver
    ```
 
-7. Access the application:
-   ```
-   http://127.0.0.1:8000/
-   ```
-
-## Production Deployment
-
-### Daphne Server Configuration
-1. Install Daphne:
-   ```sh
-   pip install daphne
-   ```
-
-2. Configure ASGI application in `asgi.py`:
-   ```python
-   import os
-   from django.core.asgi import get_asgi_application
-   from channels.routing import ProtocolTypeRouter, URLRouter
-   from channels.auth import AuthMiddlewareStack
-   from chat.routing import websocket_urlpatterns
-
-   os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chatproject.settings')
-
-   application = ProtocolTypeRouter({
-       'http': get_asgi_application(),
-       'websocket': AuthMiddlewareStack(
-           URLRouter(websocket_urlpatterns)
-       ),
-   })
-   ```
-
-3. Run with Daphne:
-   ```sh
-   daphne -b 0.0.0.0 -p 8000 chatproject.asgi:application
-   ```
-
-### Redis Configuration (Production)
-1. Install Redis server
-2. Update `settings.py` channel layer:
-   ```python
-   CHANNEL_LAYERS = {
-       'default': {
-           'BACKEND': 'channels_redis.core.RedisChannelLayer',
-           'CONFIG': {
-               'hosts': [('127.0.0.1', 6379)],
-           },
-       },
-   }
-   ```
-
-## Project Structure
-```
-miniprojectsem4/
-├── chat/                # Chat application module
-│   ├── consumers.py     # WebSocket consumer
-│   ├── routing.py       # WebSocket URL routing
-│   └── views/           # View modules
-├── chatproject/         # Project configuration
-│   ├── asgi.py         # ASGI configuration
-│   └── settings.py     # Project settings
-├── static/             # Static assets
-├── templates/          # HTML templates
-├── manage.py           # Django management script
-└── requirements.txt    # Project dependencies
-```
-
-## WebSocket Implementation
-- WebSocket connections are handled by Django Channels
-- Real-time chat messages are broadcasted through channel layers
-- Authentication is required for WebSocket connections
-- Connection status is monitored for reliability
-
-## Security Considerations
-- CSRF protection enabled for all POST requests
-- WebSocket connections are authenticated
-- Database queries are protected against SQL injection
-- Static files are served securely
+## Features
+- **User Management**: Complete authentication system with registration, login, and profile management
+- **Real-time Chat**: WebSocket-based chat system for instant communication
+- **Donation System**: Platform for managing donations with image storage in database
+- **Responsive Design**: Mobile-friendly interface with modern UI/UX
 
 ## Contributing
-To contribute to this project:
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## References & Documentation
+
+### Django & Channels
+- [Django Documentation](https://docs.djangoproject.com/)
+- [Django Channels Documentation](https://channels.readthedocs.io/)
+- [Django Authentication System](https://docs.djangoproject.com/en/stable/topics/auth/)
+- [WebSocket Protocol](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket)
+
+### Database & Storage
+- [MySQL Documentation](https://dev.mysql.com/doc/)
+- [Django Database API](https://docs.djangoproject.com/en/stable/topics/db/)
+- [Django File Uploads](https://docs.djangoproject.com/en/stable/topics/http/file-uploads/)
+
+### Frontend Development
+- [HTML5 Guide](https://developer.mozilla.org/en-US/docs/Web/HTML)
+- [CSS3 Reference](https://developer.mozilla.org/en-US/docs/Web/CSS)
+- [JavaScript Documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+
+### Deployment & Infrastructure
+- [Daphne ASGI Server](https://github.com/django/daphne)
+- [Redis Documentation](https://redis.io/documentation)
+- [Django Deployment Guide](https://docs.djangoproject.com/en/stable/howto/deployment/)
 
 ## License
-This project is developed for educational purposes as part of semester 4 coursework.
+This project is licensed under the MIT License - see the LICENSE file for details.

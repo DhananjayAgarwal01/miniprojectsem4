@@ -62,7 +62,9 @@ class Donation(models.Model):
         ('PICKED_UP', 'Picked Up'),
         ('DELIVERED', 'Delivered'),
     ], default='AVAILABLE')
-    image_path = models.ImageField(upload_to='donations/', null=True, blank=True)
+    image = models.BinaryField(null=True, blank=True)
+    image_name = models.CharField(max_length=255, null=True, blank=True)
+    image_type = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
         return f'{self.item_name} by {self.donor.username}'
