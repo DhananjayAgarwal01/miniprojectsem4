@@ -54,13 +54,20 @@ def donation_list(request):
 def donation_create(request):
     """Create a new donation."""
     if request.method == 'POST':
-        form = DonationForm(request.POST, request.FILES)
-        if form.is_valid():
-            donation = form.save(commit=False)
-            donation.donor = request.user
-            donation.save()
-            messages.success(request, 'Donation created successfully!')
-            return redirect('chat:donation_detail', pk=donation.pk)
+        try:
+            form = DonationForm(request.POST, request.FILES)
+            if form.is_valid():
+                donation = form.save(commit=False)
+                donation.donor = request.user
+                donation.save()
+                messages.success(request, 'Donation created successfully!')
+                return redirect('chat:donation_detail', pk=donation.pk)
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f'{field}: {error}')
+        except Exception as e:
+            messages.error(request, f'Error creating donation: {str(e)}')
     else:
         form = DonationForm()
     

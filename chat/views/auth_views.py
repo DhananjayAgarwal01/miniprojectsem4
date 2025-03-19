@@ -62,7 +62,16 @@ def register(request):
 @login_required
 def profile(request):
     """User profile view."""
-    user_profile = request.user.userprofile
+    try:
+        user_profile = request.user.userprofile
+    except UserProfile.DoesNotExist:
+        # Create a default profile if it doesn't exist
+        user_profile = UserProfile.objects.create(
+            user=request.user,
+            user_type='RECIPIENT'  # Default type
+        )
+        messages.info(request, 'A default profile has been created for you. Please update your information.')
+    
     context = {
         'profile': user_profile,
         'donation_count': user_profile.user.donations.count(),
@@ -76,29 +85,49 @@ def profile(request):
 @login_required
 def profile_edit(request):
     """Edit profile view."""
-    if request.method == 'POST':
+    try:
         user_profile = request.user.userprofile
-        user = request.user
-
-        # Update user email
-        email = request.POST.get('email')
-        if email and email != user.email:
-            user.email = email
-            user.save()
-
-        # Update profile fields
-        user_profile.phone = request.POST.get('phone', '')
-        user_profile.location = request.POST.get('location', '')
-        user_profile.profile_info = request.POST.get('profile_info', '')
-        user_profile.email_notifications = request.POST.get('email_notifications') == 'on'
-        
-        user_profile.save()
-        messages.success(request, 'Profile updated successfully!')
-        return redirect('chat:profile')
+    except UserProfile.DoesNotExist:
+        user_profile = UserProfile.objects.create(
+            user=request.user,
+            user_type='RECIPIENT'
+        )
+        messages.info(request, 'A default profile has been created for you.')
+    
+    if request.method == 'POST':
+        try:
+            user = request.user
+            
+            # Update user email
+            email = request.POST.get('email', '').strip()
+            if email and email != user.email:
+                try:
+                    user.email = email
+                    user.save()
+                except Exception as e:
+                    messages.error(request, 'Failed to update email. Please try again.')
+                    return render(request, 'chat/profile_edit.html', {
+                        'user': request.user,
+                        'user_profile': user_profile
+                    })
+            
+            # Update profile fields
+            user_profile.phone = request.POST.get('phone', '').strip()
+            user_profile.location = request.POST.get('location', '').strip()
+            user_profile.profile_info = request.POST.get('profile_info', '').strip()
+                
+            user_profile.email_notifications = request.POST.get('email_notifications') == 'on'
+            
+            user_profile.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('chat:profile')
+            
+        except Exception as e:
+            messages.error(request, f'Error updating profile: {str(e)}')
     
     return render(request, 'chat/profile_edit.html', {
         'user': request.user,
-        'user_profile': request.user.userprofile
+        'user_profile': user_profile
     })
 
 

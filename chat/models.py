@@ -25,6 +25,10 @@ class UserProfile(models.Model):
         ('ADMIN', 'Admin'),
     ])
     profile_info = models.TextField(blank=True, null=True)
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    location = models.CharField(max_length=100, blank=True, null=True)
+    email_notifications = models.BooleanField(default=True)
+    email_verified = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.user.username} - {self.user_type}'

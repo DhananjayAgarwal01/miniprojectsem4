@@ -75,6 +75,39 @@
         const sendButton = document.querySelector('#chat-form button');
         const messageInput = document.querySelector('#chat-message-input');
         
+        // Initialize cache
+        const cacheKey = `chat_messages_${roomName}`;
+        let cachedMessages = JSON.parse(localStorage.getItem(cacheKey) || '[]');
+
+        // Load cached messages
+        function loadCachedMessages() {
+            cachedMessages.forEach(msg => {
+                const messageHtml = createMessageHTML(msg);
+                messagesDiv.insertAdjacentHTML('beforeend', messageHtml);
+            });
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Create message HTML
+        function createMessageHTML(data) {
+            return `
+                <div class="message ${data.sender_username === username ? 'own' : 'other'}">
+                    <div class="username">${data.sender_username}</div>
+                    <div class="content">${data.message}</div>
+                    <div class="timestamp">${new Date(data.timestamp).toLocaleString()}</div>
+                </div>
+            `;
+        }
+
+        // Cache message
+        function cacheMessage(messageData) {
+            cachedMessages.push({
+                ...messageData,
+                timestamp: new Date().toISOString()
+            });
+            localStorage.setItem(cacheKey, JSON.stringify(cachedMessages));
+        }
+        
         // Debug info
         console.log('Room name:', roomName);
         console.log('Username:', username);
@@ -85,7 +118,6 @@
                 return;
             }
 
-            // Use secure WebSocket if the page is loaded over HTTPS
             const wsScheme = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
             const wsPath = wsScheme + window.location.host + '/ws/chat/' + encodeURIComponent(roomName) + '/';
             console.log('Connecting to WebSocket:', wsPath);
@@ -98,29 +130,26 @@
                     sendButton.disabled = false;
                     reconnectAttempts = 0;
                     messageInput.focus();
+                    loadCachedMessages();
                 };
                 
                 chatSocket.onmessage = function(e) {
                     console.log('Message received:', e.data);
                     const data = JSON.parse(e.data);
                     
-                    // Handle errors
                     if (data.error) {
                         console.error('WebSocket error:', data.error);
                         alert(data.error);
                         sendButton.disabled = false;
                         return;
                     }
-                    
-                    const messageHtml = `
-                        <div class="message ${data.username === username ? 'own' : 'other'}">
-                            <div class="username">${data.username}</div>
-                            <div class="content">${data.message}</div>
-                            <div class="timestamp">${new Date().toLocaleString()}</div>
-                        </div>
-                    `;
-                    messagesDiv.insertAdjacentHTML('beforeend', messageHtml);
-                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+                    if (data.type === 'message') {
+                        const messageHtml = createMessageHTML(data);
+                        messagesDiv.insertAdjacentHTML('beforeend', messageHtml);
+                        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                        cacheMessage(data);
+                    }
                 };
 
                 chatSocket.onclose = function(e) {
@@ -169,8 +198,7 @@
                     sendButton.disabled = true;
                     
                     const messageData = {
-                        'message': message,
-                        'username': username
+                        'message': message
                     };
                     console.log('Sending data:', messageData);
                     
@@ -226,4 +254,4 @@
         }, 5000);
     </script>
 </body>
-</html> 
+</html>
